@@ -33,6 +33,34 @@ def intialize_game():
     # Set FPS
     tcod.sys_set_fps(LIMIT_FPS)
 
+
+class Object:
+    #this is a generic object: the player, a monster, an item, the stairs...
+    #it's always represented by a character on screen.
+    def __init__(self, x, y, char, color):
+        self.x = x
+        self.y = y
+        self.char = char
+        self.color = color
+ 
+    def move(self, dx, dy):
+        #move by the given amount
+        self.x += dx
+        self.y += dy
+ 
+    def draw(self):
+        #set the color and then draw the character that represents this object at its position
+        tcod.console_set_default_foreground(con, self.color)
+        tcod.console_put_char(con, self.x, self.y, self.char, tcod.BKGND_NONE)
+ 
+    def clear(self):
+        #erase the character that represents this object
+        tcod.console_put_char(con, self.x, self.y, ' ', tcod.BKGND_NONE)
+
+player = Object(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, '@', tcod.white)
+npc = Object(SCREEN_WIDTH // 2 - 5, SCREEN_HEIGHT // 2, '@', tcod.yellow)
+objects = [npc, player]
+
 # ######################################################################
 # User Input
 # ######################################################################
@@ -57,16 +85,23 @@ def handle_keys():
 
     # movement keys
     if tcod.console_is_key_pressed(tcod.KEY_UP):
-        player_y -= 1
+#        player_y -= 1
+        player.move(0, -1)
  
     elif tcod.console_is_key_pressed(tcod.KEY_DOWN):
-        player_y += 1
- 
+#        player_y += 1
+        player.move(0, +1)
+
     elif tcod.console_is_key_pressed(tcod.KEY_LEFT):
-        player_x -= 1
- 
+#        player_x -= 1
+         player.move(-1, 0)
+
     elif tcod.console_is_key_pressed(tcod.KEY_RIGHT):
-        player_x += 1
+#        player_x += 1
+        player.move(+1, 0)
+
+
+
 
 #############################################
 # Main Game Loop
@@ -78,10 +113,18 @@ def main():
     exit_game = False
     while not tcod.console_is_window_closed() and not exit_game:
         tcod.console_set_default_foreground(con, tcod.white)
-        tcod.console_put_char(con, player_x, player_y, '@', tcod.BKGND_NONE)
+
+#        tcod.console_put_char(con, player_x, player_y, '@', tcod.BKGND_NONE)
+
+        for object in objects:
+            object.draw()
+
         tcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
         tcod.console_flush()
-        tcod.console_put_char(con, player_x, player_y, ' ', tcod.BKGND_NONE)
+
+        for object in objects:
+            object.clear()
+#        tcod.console_put_char(con, player_x, player_y, ' ', tcod.BKGND_NONE)
         
         exit_game = handle_keys()
     
