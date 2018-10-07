@@ -9,16 +9,60 @@ FULLSCREEN = False
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
 LIMIT_FPS = 20
+
+##### Map parameters
+MAP_WIDTH = 80
+MAP_HEIGHT = 45
+color_dark_wall = tcod.Color(0, 0, 100)
+color_dark_ground = tcod.Color(50, 50, 150)
+
+class Tile:
+    # map tile
+    def __init__(self, blocked, block_sight = None):
+        self.blocked = blocked
+
+        # if a tile is blocked it also blocks sight
+        block_sight = blocked if block_sight is None else None
+        self.block_sight = block_sight
+
+def make_map():
+    global map
+
+    # fill map with 'unblocked' tiles
+    map = [
+        [Tile(False) for y in range(MAP_HEIGHT)]
+        for x in range(MAP_WIDTH)
+    ]
+
+    # Make some pilars
+    map[30][22].blocked = True
+    map[30][22].block_sight = True
+    map[50][22].blocked = True
+    map[50][22].block_sight = True
+
+
 # Game controls
 TURN_BASED = True
 
-# con = tcod.console_new(SCREEN_WIDTH, SCREEN_WIDTH)
+def render_all():
+    # Draw all objects in the list
+    for object in objects:
+        object.draw()
+
+    # Render map
+    for y in range(MAP_HEIGHT):
+        for x in range(MAP_WIDTH):
+            wall = map[x][y].block_sight
+            if wall:
+                tcod.console_set_char_background(con, x, y, color_dark_wall, tcod.BKGND_SET)
+            else:
+                tcod.console_set_char_background(con, x, y, color_dark_ground, tcod.BKGND_SET)
+    
+    tcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
 
 def intialize_game():
     # Setup player
-    global player_x, player_y, con
-    player_x = SCREEN_WIDTH // 2
-    player_y = SCREEN_HEIGHT // 2
+    global con
 
     # Setup font
     font_path = 'arial10x10.png'  # this will look in the same folder as this script
@@ -32,6 +76,7 @@ def intialize_game():
 
     # Set FPS
     tcod.sys_set_fps(LIMIT_FPS)
+
 
 
 class Object:
@@ -72,8 +117,6 @@ def get_key_event(turn_based=None):
     return key
     
 def handle_keys():
-    global player_x, player_y
-
     key = get_key_event(TURN_BASED)
 
     if key.vk == tcod.KEY_ENTER and key.lalt:
@@ -85,19 +128,15 @@ def handle_keys():
 
     # movement keys
     if tcod.console_is_key_pressed(tcod.KEY_UP):
-#        player_y -= 1
         player.move(0, -1)
  
     elif tcod.console_is_key_pressed(tcod.KEY_DOWN):
-#        player_y += 1
         player.move(0, +1)
 
     elif tcod.console_is_key_pressed(tcod.KEY_LEFT):
-#        player_x -= 1
          player.move(-1, 0)
 
     elif tcod.console_is_key_pressed(tcod.KEY_RIGHT):
-#        player_x += 1
         player.move(+1, 0)
 
 
@@ -114,18 +153,18 @@ def main():
     while not tcod.console_is_window_closed() and not exit_game:
         tcod.console_set_default_foreground(con, tcod.white)
 
-#        tcod.console_put_char(con, player_x, player_y, '@', tcod.BKGND_NONE)
+        render_all()
 
-        for object in objects:
-            object.draw()
+#        for object in objects:
+#            object.draw()
 
-        tcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
+#        tcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
         tcod.console_flush()
 
         for object in objects:
             object.clear()
-#        tcod.console_put_char(con, player_x, player_y, ' ', tcod.BKGND_NONE)
         
         exit_game = handle_keys()
-    
+
+make_map()    
 main()
