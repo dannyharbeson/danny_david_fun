@@ -9,6 +9,7 @@ FULLSCREEN = False
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
 LIMIT_FPS = 20
+TURN_BASED = False
 
 ##### Map parameters
 MAP_WIDTH = 80
@@ -42,7 +43,7 @@ def make_map():
 
 
 # Game controls
-TURN_BASED = True
+
 
 def render_all():
     # Draw all objects in the list
@@ -90,8 +91,9 @@ class Object:
  
     def move(self, dx, dy):
         #move by the given amount
-        self.x += dx
-        self.y += dy
+        if not map[self.x + dx][self.y + dy].blocked:
+            self.x += dx
+            self.y += dy
  
     def draw(self):
         #set the color and then draw the character that represents this object at its position
